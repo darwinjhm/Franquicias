@@ -34,7 +34,7 @@ async def actualizar_sucursal(
                 detail=f"Sucursal con ID {sucursal_id} no encontrada"
             )
         
-        return SucursalResponse.model_validate(sucursal)
+        return SucursalResponse.from_orm(sucursal)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -66,7 +66,7 @@ async def obtener_sucursal(
             detail=f"Sucursal con ID {sucursal_id} no encontrada"
         )
     
-    return SucursalResponse.model_validate(sucursal)
+    return SucursalResponse.from_orm(sucursal)
 
 
 @router.get("/", response_model=List[SucursalResponse])
@@ -76,7 +76,7 @@ async def obtener_todas_sucursales(db: Session = Depends(get_db)):
     """
     service = SucursalService(db)
     sucursales = service.obtener_todas_sucursales()
-    return [SucursalResponse.model_validate(s) for s in sucursales]
+    return [SucursalResponse.from_orm(s) for s in sucursales]
 
 
 @router.delete("/{sucursal_id}", status_code=status.HTTP_204_NO_CONTENT)

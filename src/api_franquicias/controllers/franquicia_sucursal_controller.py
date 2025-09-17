@@ -27,7 +27,7 @@ async def agregar_sucursal(
     try:
         service = SucursalService(db)
         sucursal = service.crear_sucursal(sucursal_data.nombre, franquicia_id)
-        return SucursalResponse.model_validate(sucursal)
+        return SucursalResponse.from_orm(sucursal)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -53,7 +53,7 @@ async def obtener_sucursales_por_franquicia(
     try:
         service = SucursalService(db)
         sucursales = service.obtener_sucursales_por_franquicia(franquicia_id)
-        return [SucursalResponse.model_validate(s) for s in sucursales]
+        return [SucursalResponse.from_orm(s) for s in sucursales]
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

@@ -7,8 +7,7 @@ pydantic-settings==2.1.0
 # Base de datos
 sqlalchemy==2.0.23
 alembic==1.13.1
-psycopg2-binary==2.9.9
-sqlite3
+# psycopg2-binary==2.9.9  # Comentado para desarrollo local con SQLite
 
 # Utilidades
 python-multipart==0.0.6

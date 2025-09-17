@@ -32,7 +32,7 @@ async def agregar_producto(
             producto_data.cantidad_stock, 
             sucursal_id
         )
-        return ProductoResponse.model_validate(producto)
+        return ProductoResponse.from_orm(producto)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -58,7 +58,7 @@ async def obtener_productos_por_sucursal(
     try:
         service = ProductoService(db)
         productos = service.obtener_productos_por_sucursal(sucursal_id)
-        return [ProductoResponse.model_validate(p) for p in productos]
+        return [ProductoResponse.from_orm(p) for p in productos]
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

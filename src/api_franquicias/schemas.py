@@ -55,7 +55,7 @@ class ProductoResponse(BaseModel):
     fecha_actualizacion: Optional[datetime] = None
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class SucursalResponse(BaseModel):
@@ -68,7 +68,7 @@ class SucursalResponse(BaseModel):
     productos: List[ProductoResponse] = []
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class FranquiciaResponse(BaseModel):
@@ -80,7 +80,7 @@ class FranquiciaResponse(BaseModel):
     sucursales: List[SucursalResponse] = []
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class ReporteStockResponse(BaseModel):

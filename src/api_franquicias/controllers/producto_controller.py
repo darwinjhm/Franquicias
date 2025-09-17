@@ -39,7 +39,7 @@ async def actualizar_producto(
                 detail=f"Producto con ID {producto_id} no encontrado"
             )
         
-        return ProductoResponse.model_validate(producto)
+        return ProductoResponse.from_orm(producto)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -74,7 +74,7 @@ async def actualizar_stock(
                 detail=f"Producto con ID {producto_id} no encontrado"
             )
         
-        return ProductoResponse.model_validate(producto)
+        return ProductoResponse.from_orm(producto)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -106,7 +106,7 @@ async def obtener_producto(
             detail=f"Producto con ID {producto_id} no encontrado"
         )
     
-    return ProductoResponse.model_validate(producto)
+    return ProductoResponse.from_orm(producto)
 
 
 @router.get("/", response_model=List[ProductoResponse])
@@ -116,7 +116,7 @@ async def obtener_todos_productos(db: Session = Depends(get_db)):
     """
     service = ProductoService(db)
     productos = service.obtener_todos_productos()
-    return [ProductoResponse.model_validate(p) for p in productos]
+    return [ProductoResponse.from_orm(p) for p in productos]
 
 
 @router.delete("/{producto_id}", status_code=status.HTTP_204_NO_CONTENT)
