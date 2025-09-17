@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  api-franquicias:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./franquicias.db
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DEBUG=True
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Servicio opcional para PostgreSQL en desarrollo
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=franquicias
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    profiles:
+      - postgres
+
+volumes:
+  postgres_data:
