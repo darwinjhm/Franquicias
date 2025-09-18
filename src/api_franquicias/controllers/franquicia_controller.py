@@ -63,7 +63,7 @@ async def obtener_franquicia(
             detail=f"Franquicia con ID {franquicia_id} no encontrada"
         )
     
-    return FranquiciaResponse.from_orm(franquicia)
+        return FranquiciaResponse.from_orm(franquicia)
 
 
 @router.get("/", response_model=List[FranquiciaResponse])

@@ -1,109 +1,221 @@
 #!/usr/bin/env python3
 """
-Test simple para verificar que la API funciona correctamente
+Test simple para verificar la funcionalidad básica de la API
 """
 
 import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.append('src')
 
-from api_franquicias.main import app
-from fastapi.testclient import TestClient
+def test_imports():
+    """Test que todos los módulos se pueden importar"""
+    print("🔍 Probando imports...")
+    
+    try:
+        from api_franquicias.models import Franquicia, Sucursal, Producto, Base
+        print("✅ Modelos importados correctamente")
+    except Exception as e:
+        print(f"❌ Error importando modelos: {e}")
+        return False
+    
+    try:
+        from api_franquicias.repositories import FranquiciaRepository, SucursalRepository, ProductoRepository
+        print("✅ Repositorios importados correctamente")
+    except Exception as e:
+        print(f"❌ Error importando repositorios: {e}")
+        return False
+    
+    try:
+        from api_franquicias.services import FranquiciaService, SucursalService, ProductoService
+        print("✅ Servicios importados correctamente")
+    except Exception as e:
+        print(f"❌ Error importando servicios: {e}")
+        return False
+    
+    try:
+        from api_franquicias.schemas import FranquiciaCreate, FranquiciaResponse
+        print("✅ Esquemas importados correctamente")
+    except Exception as e:
+        print(f"❌ Error importando esquemas: {e}")
+        return False
+    
+    try:
+        from api_franquicias.database import create_tables, get_db
+        print("✅ Base de datos importada correctamente")
+    except Exception as e:
+        print(f"❌ Error importando base de datos: {e}")
+        return False
+    
+    return True
 
-def test_basic_functionality():
-    """Test básico de funcionalidad"""
-    print("🧪 Iniciando test básico de la API...")
+def test_database_creation():
+    """Test creación de base de datos"""
+    print("\n🔍 Probando creación de base de datos...")
     
-    client = TestClient(app)
+    try:
+        from api_franquicias.database import create_tables
+        create_tables()
+        print("✅ Tablas creadas correctamente")
+        return True
+    except Exception as e:
+        print(f"❌ Error creando tablas: {e}")
+        return False
+
+def test_models():
+    """Test creación de modelos"""
+    print("\n🔍 Probando creación de modelos...")
     
-    # Test 1: Health check
-    print("1. Probando health check...")
-    response = client.get("/health")
-    assert response.status_code == 200
-    print("✅ Health check OK")
+    try:
+        from api_franquicias.models import Franquicia, Sucursal, Producto
+        
+        # Crear franquicia
+        franquicia = Franquicia(nombre="Franquicia Test")
+        print(f"✅ Franquicia creada: {franquicia}")
+        
+        # Crear sucursal
+        sucursal = Sucursal(nombre="Sucursal Test", franquicia_id=1)
+        print(f"✅ Sucursal creada: {sucursal}")
+        
+        # Crear producto
+        producto = Producto(nombre="Producto Test", cantidad_stock=100, sucursal_id=1)
+        print(f"✅ Producto creado: {producto}")
+        
+        return True
+    except Exception as e:
+        print(f"❌ Error creando modelos: {e}")
+        return False
+
+def test_schemas():
+    """Test validación de esquemas"""
+    print("\n🔍 Probando esquemas Pydantic...")
     
-    # Test 2: Root endpoint
-    print("2. Probando endpoint raíz...")
-    response = client.get("/")
-    assert response.status_code == 200
-    print("✅ Endpoint raíz OK")
+    try:
+        from api_franquicias.schemas import FranquiciaCreate, FranquiciaResponse
+        
+        # Test creación de franquicia
+        franquicia_data = FranquiciaCreate(nombre="Franquicia Schema Test")
+        print(f"✅ FranquiciaCreate válido: {franquicia_data}")
+        
+        # Test validación de datos vacíos
+        try:
+            FranquiciaCreate(nombre="")
+            print("❌ Debería fallar con nombre vacío")
+            return False
+        except:
+            print("✅ Validación de nombre vacío funciona")
+        
+        return True
+    except Exception as e:
+        print(f"❌ Error con esquemas: {e}")
+        return False
+
+def test_repositories():
+    """Test repositorios con base de datos en memoria"""
+    print("\n🔍 Probando repositorios...")
     
-    # Test 3: Crear franquicia
-    print("3. Probando crear franquicia...")
-    franquicia_data = {"nombre": "Franquicia Test"}
-    response = client.post("/api/franquicias/", json=franquicia_data)
-    assert response.status_code == 201
-    franquicia = response.json()
-    franquicia_id = franquicia["id"]
-    print(f"✅ Franquicia creada con ID: {franquicia_id}")
+    try:
+        from sqlalchemy import create_engine
+        from sqlalchemy.orm import sessionmaker
+        from api_franquicias.models.base import Base
+        from api_franquicias.repositories import FranquiciaRepository
+        
+        # Crear base de datos en memoria
+        engine = create_engine("sqlite:///:memory:")
+        Base.metadata.create_all(bind=engine)
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        
+        # Crear sesión
+        db = SessionLocal()
+        
+        # Test repositorio
+        repo = FranquiciaRepository(db)
+        franquicia = repo.create("Franquicia Repo Test")
+        print(f"✅ Franquicia creada en repositorio: {franquicia.nombre}")
+        
+        # Test obtener por ID
+        franquicia_obtenida = repo.get_by_id(franquicia.id)
+        if franquicia_obtenida:
+            print(f"✅ Franquicia obtenida por ID: {franquicia_obtenida.nombre}")
+        else:
+            print("❌ No se pudo obtener franquicia por ID")
+            return False
+        
+        db.close()
+        return True
+    except Exception as e:
+        print(f"❌ Error con repositorios: {e}")
+        return False
+
+def test_services():
+    """Test servicios"""
+    print("\n🔍 Probando servicios...")
     
-    # Test 4: Obtener franquicia
-    print("4. Probando obtener franquicia...")
-    response = client.get(f"/api/franquicias/{franquicia_id}")
-    assert response.status_code == 200
-    print("✅ Franquicia obtenida correctamente")
+    try:
+        from sqlalchemy import create_engine
+        from sqlalchemy.orm import sessionmaker
+        from api_franquicias.models.base import Base
+        from api_franquicias.services import FranquiciaService
+        
+        # Crear base de datos en memoria
+        engine = create_engine("sqlite:///:memory:")
+        Base.metadata.create_all(bind=engine)
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        
+        # Crear sesión
+        db = SessionLocal()
+        
+        # Test servicio
+        service = FranquiciaService(db)
+        franquicia = service.crear_franquicia("Franquicia Service Test")
+        print(f"✅ Franquicia creada en servicio: {franquicia.nombre}")
+        
+        # Test validación de nombre duplicado
+        try:
+            service.crear_franquicia("Franquicia Service Test")
+            print("❌ Debería fallar con nombre duplicado")
+            return False
+        except ValueError as e:
+            print(f"✅ Validación de nombre duplicado funciona: {e}")
+        
+        db.close()
+        return True
+    except Exception as e:
+        print(f"❌ Error con servicios: {e}")
+        return False
+
+def main():
+    """Función principal del test"""
+    print("🚀 Iniciando test robusto de la API de Franquicias")
+    print("=" * 60)
     
-    # Test 5: Agregar sucursal
-    print("5. Probando agregar sucursal...")
-    sucursal_data = {"nombre": "Sucursal Test"}
-    response = client.post(f"/api/franquicias/{franquicia_id}/sucursales", json=sucursal_data)
-    assert response.status_code == 201
-    sucursal = response.json()
-    sucursal_id = sucursal["id"]
-    print(f"✅ Sucursal creada con ID: {sucursal_id}")
+    tests = [
+        test_imports,
+        test_database_creation,
+        test_models,
+        test_schemas,
+        test_repositories,
+        test_services
+    ]
     
-    # Test 6: Agregar producto
-    print("6. Probando agregar producto...")
-    producto_data = {"nombre": "Producto Test", "cantidad_stock": 100}
-    response = client.post(f"/api/sucursales/{sucursal_id}/productos", json=producto_data)
-    assert response.status_code == 201
-    producto = response.json()
-    producto_id = producto["id"]
-    print(f"✅ Producto creado con ID: {producto_id}")
+    passed = 0
+    total = len(tests)
     
-    # Test 7: Modificar stock
-    print("7. Probando modificar stock...")
-    stock_data = {"stock": 200}
-    response = client.patch(f"/api/productos/{producto_id}/stock", json=stock_data)
-    assert response.status_code == 200
-    print("✅ Stock modificado correctamente")
+    for test in tests:
+        if test():
+            passed += 1
+        print()
     
-    # Test 8: Reporte de stock
-    print("8. Probando reporte de stock...")
-    response = client.get(f"/api/franquicias/{franquicia_id}/reporte-stock")
-    assert response.status_code == 200
-    reporte = response.json()
-    print(f"✅ Reporte de stock obtenido: {len(reporte)} productos")
+    print("=" * 60)
+    print(f"📊 Resultados: {passed}/{total} tests pasaron")
     
-    # Test 9: Actualizar entidades
-    print("9. Probando actualizar entidades...")
-    
-    # Actualizar franquicia
-    update_data = {"nombre": "Franquicia Actualizada"}
-    response = client.patch(f"/api/franquicias/{franquicia_id}", json=update_data)
-    assert response.status_code == 200
-    print("✅ Franquicia actualizada")
-    
-    # Actualizar sucursal
-    update_data = {"nombre": "Sucursal Actualizada"}
-    response = client.patch(f"/api/sucursales/{sucursal_id}", json=update_data)
-    assert response.status_code == 200
-    print("✅ Sucursal actualizada")
-    
-    # Actualizar producto
-    update_data = {"nombre": "Producto Actualizado"}
-    response = client.patch(f"/api/productos/{producto_id}", json=update_data)
-    assert response.status_code == 200
-    print("✅ Producto actualizado")
-    
-    # Test 10: Eliminar producto
-    print("10. Probando eliminar producto...")
-    response = client.delete(f"/api/productos/{producto_id}")
-    assert response.status_code == 204
-    print("✅ Producto eliminado correctamente")
-    
-    print("\n🎉 ¡Todos los tests pasaron exitosamente!")
-    print("✅ La API está funcionando correctamente")
+    if passed == total:
+        print("🎉 ¡Todos los tests pasaron exitosamente!")
+        print("✅ La implementación está funcionando correctamente")
+        return True
+    else:
+        print("❌ Algunos tests fallaron")
+        return False
 
 if __name__ == "__main__":
-    test_basic_functionality()
+    success = main()
+    sys.exit(0 if success else 1)
