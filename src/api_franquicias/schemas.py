@@ -2,7 +2,7 @@
 Esquemas Pydantic para validación de datos de entrada y salida
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
@@ -54,8 +54,7 @@ class ProductoResponse(BaseModel):
     fecha_creacion: Optional[datetime] = None
     fecha_actualizacion: Optional[datetime] = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class SucursalResponse(BaseModel):
@@ -67,8 +66,7 @@ class SucursalResponse(BaseModel):
     fecha_actualizacion: Optional[datetime] = None
     productos: List[ProductoResponse] = []
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class FranquiciaResponse(BaseModel):
@@ -79,8 +77,7 @@ class FranquiciaResponse(BaseModel):
     fecha_actualizacion: Optional[datetime] = None
     sucursales: List[SucursalResponse] = []
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ReporteStockResponse(BaseModel):

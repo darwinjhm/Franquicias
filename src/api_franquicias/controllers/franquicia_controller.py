@@ -31,7 +31,7 @@ async def crear_franquicia(
     try:
         service = FranquiciaService(db)
         franquicia = service.crear_franquicia(franquicia_data.nombre)
-        return FranquiciaResponse.from_orm(franquicia)
+        return FranquiciaResponse.model_validate(franquicia)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -63,7 +63,7 @@ async def obtener_franquicia(
             detail=f"Franquicia con ID {franquicia_id} no encontrada"
         )
     
-        return FranquiciaResponse.from_orm(franquicia)
+    return FranquiciaResponse.model_validate(franquicia)
 
 
 @router.get("/", response_model=List[FranquiciaResponse])
@@ -73,7 +73,7 @@ async def obtener_todas_franquicias(db: Session = Depends(get_db)):
     """
     service = FranquiciaService(db)
     franquicias = service.obtener_todas_franquicias()
-    return [FranquiciaResponse.from_orm(f) for f in franquicias]
+    return [FranquiciaResponse.model_validate(f) for f in franquicias]
 
 
 @router.patch("/{franquicia_id}", response_model=FranquiciaResponse)
@@ -98,7 +98,7 @@ async def actualizar_franquicia(
                 detail=f"Franquicia con ID {franquicia_id} no encontrada"
             )
         
-        return FranquiciaResponse.from_orm(franquicia)
+        return FranquiciaResponse.model_validate(franquicia)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -144,7 +144,7 @@ async def obtener_reporte_stock(
     try:
         service = FranquiciaService(db)
         reporte = service.obtener_reporte_stock(franquicia_id)
-        return [ReporteStockResponse.from_orm(item) for item in reporte]
+        return [ReporteStockResponse.model_validate(item) for item in reporte]
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

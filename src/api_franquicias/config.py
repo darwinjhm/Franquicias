@@ -4,7 +4,7 @@ Configuración de la aplicación
 
 import os
 from typing import List
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -32,9 +32,10 @@ class Settings(BaseSettings):
     cors_methods: List[str] = ["GET", "POST", "PUT", "DELETE", "PATCH"]
     cors_headers: List[str] = ["*"]
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    model_config = {
+        "env_file": ".env",
+        "case_sensitive": False
+    }
 
 
 # Instancia global de configuración
